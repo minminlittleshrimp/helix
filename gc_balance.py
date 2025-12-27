@@ -99,7 +99,7 @@ class GCBalancer:
         """
         Generate search set S_{epsilon,n} = {0, n} ∪ {2⌊εn⌋, 4⌊εn⌋, ...}
 
-        This is the set of candidate flip positions to check.
+        Enhanced to include more candidates for better coverage.
 
         Args:
             n: Length of sequence
@@ -107,14 +107,28 @@ class GCBalancer:
         Returns:
             Sorted list of candidate positions
         """
-        S = [0, n]
+        S = set([0, n])
+
+        # Add the standard search points
         step = 2 * int(self.epsilon * n)
         if step > 0:
             i = step
             while i < n:
-                S.append(i)
+                S.add(i)
                 i += step
-        return sorted(set(S))
+
+        # For short sequences or when step is 0, add more granular search points
+        if n <= 20 or step == 0:
+            # Add every position for short sequences
+            for i in range(n + 1):
+                S.add(i)
+        else:
+            # Add quarter points for better coverage
+            S.add(n // 4)
+            S.add(n // 2)
+            S.add(3 * n // 4)
+
+        return sorted(S)
 
     def balance(self, sequence: List[int]) -> Tuple[List[int], int]:
         """
@@ -133,16 +147,32 @@ class GCBalancer:
             Tuple of (balanced_sequence, balancing_index)
         """
         n = len(sequence)
+        if n == 0:
+            return sequence, 0
+
         search_set = self.generate_search_set(n)
 
+        # Try each candidate position
         for t in search_set:
             test_seq = self.flip_sequence(sequence, t)
             if self.is_balanced(test_seq):
                 return test_seq, t
 
-        # Fallback: return original if no balance found
-        # In practice, Method D guarantees a solution exists
-        return sequence, 0
+        # If no exact balance found, find the closest one
+        best_t = 0
+        best_diff = float('inf')
+        best_seq = sequence
+
+        for t in search_set:
+            test_seq = self.flip_sequence(sequence, t)
+            gc = self.gc_content(test_seq)
+            diff = abs(gc - 0.5)
+            if diff < best_diff:
+                best_diff = diff
+                best_t = t
+                best_seq = test_seq
+
+        return best_seq, best_t
 
     def create_index_suffix(self, t: int, n: int) -> List[int]:
         """
