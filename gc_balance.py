@@ -217,7 +217,19 @@ class GCBalancer:
 
         Returns:
             Decoded balancing index t
+
+        Raises:
+            ValueError: If suffix is not valid interleaved format
         """
+        # Validate interleaved format: suffix[i+1] should be flip of suffix[i]
+        flip_map = {0: 2, 2: 0, 1: 3, 3: 1}
+        if len(suffix) % 2 != 0:
+            raise ValueError("Index suffix must have even length")
+
+        for i in range(0, len(suffix), 2):
+            if suffix[i+1] != flip_map[suffix[i]]:
+                raise ValueError(f"Index suffix not properly interleaved at position {i}")
+
         # Extract every other symbol (the original tau)
         tau = [suffix[i] for i in range(0, len(suffix), 2)]
 
