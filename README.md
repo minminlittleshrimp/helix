@@ -10,7 +10,7 @@ by Tuan Thanh Nguyen, Kui Cai, Kees A. Schouhamer Immink, and Han Mao Kiah
 HELIX transforms binary data into DNA sequences while satisfying critical biochemical constraints:
 
 - **Runlength Constraint (RLL)**: Prevents homopolymer runs longer than `ell` nucleotides, reducing sequencing errors
-- **GC-Content Balancing**: Maintains GC-content near 50% ± `epsilon` for DNA stability
+- **GC-Content Balancing**: Maintains GC-content near 50% +- `epsilon` for DNA stability
 - **Error Correction**: Incorporates Varshamov-Tenengolts (VT) syndromes for single-edit error detection
 
 ## Architecture
@@ -18,7 +18,7 @@ HELIX transforms binary data into DNA sequences while satisfying critical bioche
 The system consists of modular components, each handling one step of the encoding/decoding pipeline:
 
 ```
-mapping.py          - Binary ↔ Quaternary ↔ DNA conversions
+mapping.py          - Binary <-> Quaternary <-> DNA conversions
 differential.py     - Differential encoding/decoding
 rll_constraint.py   - Method B: Runlength limiting
 gc_balance.py       - Method D: GC-content balancing
@@ -90,13 +90,13 @@ analyzer.print_analysis(analysis)
 
 The HELIX encoding process follows these steps:
 
-1. **Binary → Quaternary**: Convert binary string to base-4 representation (2 bits → 1 quaternary symbol)
+1. **Binary -> Quaternary**: Convert binary string to base-4 representation (2 bits -> 1 quaternary symbol)
 2. **Differential Encoding**: Transform to facilitate runlength constraint enforcement
 3. **RLL Encoding**: Apply Method B to prevent long homopolymer runs
 4. **GC-Balancing**: Use Method D with prefix flipping to achieve 50% GC-content
 5. **Index Suffix**: Append interleaved suffix encoding the balancing index
 6. **Error Correction**: Add VT syndrome and checksum (optional)
-7. **DNA Conversion**: Map quaternary to nucleotides (0→A, 1→T, 2→C, 3→G)
+7. **DNA Conversion**: Map quaternary to nucleotides (0->A, 1->T, 2->C, 3->G)
 
 Decoding reverses these steps to recover the original binary data.
 
@@ -186,7 +186,7 @@ Examples include:
   - Larger values = more efficient encoding, but longer homopolymer runs
 
 - **`epsilon`** (default: 0.05): GC-content tolerance
-  - Target: 50% ± epsilon
+  - Target: 50% +- epsilon
   - Smaller values = tighter GC-balance, better DNA stability
   - Larger values = more relaxed constraint, higher efficiency
 

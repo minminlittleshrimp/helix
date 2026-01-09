@@ -9,7 +9,7 @@ from typing import List, Tuple
 class GCBalancer:
     """
     GC-content balancing using Method D from the paper.
-    Ensures GC-content (percentage of C and G) is within 50% ± epsilon.
+    Ensures GC-content (percentage of C and G) is within 50% +- epsilon.
     """
 
     def __init__(self, epsilon: float = 0.05):
@@ -17,7 +17,7 @@ class GCBalancer:
         Initialize GC balancer.
 
         Args:
-            epsilon: GC-content tolerance (target: 0.5 ± epsilon)
+            epsilon: GC-content tolerance (target: 0.5 +- epsilon)
         """
         self.epsilon = epsilon
         # Flipping rule: f(0)=2, f(2)=0, f(1)=3, f(3)=1
@@ -97,7 +97,7 @@ class GCBalancer:
 
     def generate_search_set(self, n: int) -> List[int]:
         """
-        Generate search set S_{epsilon,n} = {0, n} ∪ {2⌊εn⌋, 4⌊εn⌋, ...}
+        Generate search set S_{epsilon,n} = {0, n} U {2|epsilon*n|, 4|epsilon*n|, ...}
 
         Enhanced to include more candidates for better coverage.
 

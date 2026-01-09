@@ -28,7 +28,7 @@ The primary objective of HELIX is to ensure that generated DNA sequences are che
 **Example:**
 ```python
 # Maximum runlength of 3 enforced
-"AAAAA" → "AATAA"  # Prevented by RLL encoding
+"AAAAA" -> "AATAA"  # Prevented by RLL encoding
 ```
 
 ### 1.2 GC-Content Balance
@@ -41,7 +41,7 @@ The primary objective of HELIX is to ensure that generated DNA sequences are che
 - Module: `gc_balance.py`
 - Algorithm: Method D (prefix flipping)
 - Flipping rule: $f(0)=2$, $f(2)=0$, $f(1)=3$, $f(3)=1$
-  - Swaps A↔C and T↔G
+  - Swaps A<->C and T<->G
   - Maintains sequence structure while adjusting GC-content
 
 **Process:**
@@ -53,7 +53,7 @@ The primary objective of HELIX is to ensure that generated DNA sequences are che
 
 **Example:**
 ```python
-# Input has 20% GC → after flipping first 5 symbols → 48% GC ✓
+# Input has 20% GC -> after flipping first 5 symbols -> 48% GC [OK]
 ```
 
 ### 1.3 Safe Junction Handling
@@ -98,7 +98,7 @@ To be a practical tool for large-scale data storage, HELIX meets several mathema
 ```python
 # Original: ATCG
 # Received: ATTCG (insertion of T)
-# VT syndrome detects mismatch → enables correction
+# VT syndrome detects mismatch -> enables correction
 ```
 
 ### 2.2 Linear Complexity $O(n)$
@@ -161,7 +161,7 @@ assert codec.decode(codec.encode(data)) == data
 
 ```
 helix.py               # Main codec integration & pipeline
-├── mapping.py         # Binary ↔ Quaternary ↔ DNA conversions
+├── mapping.py         # Binary <-> Quaternary <-> DNA conversions
 ├── differential.py    # Differential encoding/decoding
 ├── rll_constraint.py  # Method B: Runlength limiting
 ├── gc_balance.py      # Method D: GC-content balancing
@@ -225,10 +225,10 @@ python helix.py --encode "data" --ell 4 --epsilon 0.06
 
 The complete HELIX encoding process follows a **7-step pipeline**:
 
-### Step 1: Binary → Quaternary
+### Step 1: Binary -> Quaternary
 **Module:** `mapping.py`
 
-Converts binary string to base-4 representation (2 bits → 1 quaternary symbol).
+Converts binary string to base-4 representation (2 bits -> 1 quaternary symbol).
 
 ```
 Binary:     11 01 00 11
@@ -301,13 +301,13 @@ Maps quaternary symbols to nucleotides.
 
 The decoding process **reverses each encoding step**:
 
-1. **DNA → Quaternary** (reverse mapping)
+1. **DNA -> Quaternary** (reverse mapping)
 2. **Extract suffix** (glue symbol, index, error correction)
 3. **Verify error correction** (check VT syndrome + checksum)
 4. **Unbalance** (reverse prefix flipping using index $t$)
 5. **RLL decode** (expand compressed runs)
 6. **Differential decode** (reconstruct original sequence)
-7. **Quaternary → Binary** (2 quaternary symbols → 4 bits)
+7. **Quaternary -> Binary** (2 quaternary symbols -> 4 bits)
 
 **Key Property:** Each step is **bijective** and **deterministic**, ensuring lossless reconstruction.
 

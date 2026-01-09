@@ -23,14 +23,14 @@ class HelixCodec:
     Complete HELIX encoding/decoding pipeline.
     Transforms binary data into DNA sequences with:
     - Runlength constraint (no homopolymer runs > ell)
-    - GC-content balancing (50% ± epsilon)
+    - GC-content balancing (50% +- epsilon)
     - Error correction capability (single-edit errors)
-    
+
     Implementation Notes:
     - This single-strand implementation reliably handles 8-96 bit sequences
     - Typical DNA synthesis: 100-300 nucleotides ≈ 200-600 bits capacity
     - Paper's Method B supports ARBITRARILY LARGE data via:
-      * Linear-time O(n) complexity (vs. O(n²) enumeration methods)
+      * Linear-time O(n) complexity (vs. O(n^2) enumeration methods)
       * Subword chunking for files >300nt (e.g., 10GB files)
       * Modified pointer system at chunk boundaries
     - Current limits (6-digit length, 4-digit RLL count) are implementation
@@ -82,7 +82,7 @@ class HelixCodec:
             raise ValueError("Binary data cannot be empty")
         if not all(c in '01' for c in binary_data):
             raise ValueError(f"Binary data must contain only '0' and '1' characters")
-        
+
         # Store original length to preserve leading zeros
         original_length = len(binary_data)
 
@@ -151,7 +151,7 @@ class HelixCodec:
 
         # Apply Junction Rule (Corollary 24): Insert glue symbols to prevent
         # forbidden runs at boundaries
-        
+
         # Glue 1: Between EC suffix and length marker
         if final_seq:
             last_symbol = final_seq[-1]
@@ -164,13 +164,13 @@ class HelixCodec:
 
         # Add length marker [3,3,3]
         final_seq = final_seq + [3, 3, 3]
-        
+
         # Glue 2: Between marker and length digits
         # Prevent [3, 3, 3] + [3, ...] creating a run of 4 threes
         if length_bytes[0] == 3:
             glue2 = 0  # Any symbol != 3
             final_seq = final_seq + [glue2]
-        
+
         # Add length encoding
         final_seq = final_seq + length_bytes
 
@@ -223,7 +223,7 @@ class HelixCodec:
                     quaternary_full[marker_pos] == 3 and
                     quaternary_full[marker_pos + 1] == 3 and
                     quaternary_full[marker_pos + 2] == 3):
-                    
+
                     # Found marker, check if there's a glue2 after it
                     after_marker_pos = marker_pos + 3
                     if after_marker_pos < len(quaternary_full):
@@ -236,20 +236,20 @@ class HelixCodec:
                             length_quat = quaternary_full[after_marker_pos:after_marker_pos + 6]
                         else:
                             continue
-                        
+
                         if len(length_quat) == 6:
                             # Decode length (6 digits, LSB first)
-                            original_length = (length_quat[0] + length_quat[1] * 4 + 
+                            original_length = (length_quat[0] + length_quat[1] * 4 +
                                              length_quat[2] * 16 + length_quat[3] * 64 +
                                              length_quat[4] * 256 + length_quat[5] * 1024)
                             # Remove everything from glue1 onward
                             quaternary = quaternary_full[:marker_pos - 1]
-                            
+
                             if verbose:
                                 print(f"\nStep 0 - Extract original length:")
                                 print(f"  Encoded length: {original_length} bits")
                             break
-        
+
         if original_length is None:
             # Fallback: no valid marker found
             quaternary = quaternary_full
@@ -295,7 +295,7 @@ class HelixCodec:
         # Ensure max_suffix_len is even (index suffix always has even length)
         if max_suffix_len % 2 != 0:
             max_suffix_len -= 1
-        
+
         for suffix_len in range(max_suffix_len, 1, -2):
             if suffix_len > len(quaternary):
                 continue
